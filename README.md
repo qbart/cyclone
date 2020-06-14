@@ -1,6 +1,6 @@
 [![GoDoc](https://godoc.org/github.com/qbart/cyclone?status.svg)](https://pkg.go.dev/github.com/qbart/cyclone/cyclone)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/qbart/cyclone.svg)
-![CI](https://github.com/qbart/cyclone/workflows/CI/badge.svg?branch=master)
+[![CI](https://github.com/qbart/cyclone/workflows/CI/badge.svg?branch=master)](https://github.com/qbart/cyclone/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/qbart/cyclone)](https://goreportcard.com/report/github.com/qbart/cyclone)
 [![Last commit](https://img.shields.io/github/last-commit/qbart/cyclone)](https://github.com/qbart/cyclone/commits/master)
   
