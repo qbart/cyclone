@@ -1,10 +1,12 @@
-[![LICENSE](https://img.shields.io/github/license/qbart/cyclone)](https://github.com/qbart/cyclone/blob/master/LICENSE)
-[![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
+[![GoDoc](https://godoc.org/github.com/qbart/cyclone?status.svg)](https://pkg.go.dev/github.com/qbart/cyclone/cyclone)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/qbart/cyclone.svg)
+![CI](https://github.com/qbart/cyclone/workflows/CI/badge.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/qbart/cyclone)](https://goreportcard.com/report/github.com/qbart/cyclone)
 [![Last commit](https://img.shields.io/github/last-commit/qbart/cyclone)](https://github.com/qbart/cyclone/commits/master)
+  
 # cyclone - WIP - not intened for production use
 
-Wrapper around [radix](https://github.com/mediocregopher/radix) with some additional TODO-features. [GoDoc here](https://pkg.go.dev/github.com/qbart/cyclone/cyclone)
+Wrapper around [radix](https://github.com/mediocregopher/radix) with some additional TODO-features.
 
 ## Connection
 
@@ -13,7 +15,7 @@ redis := cyclone.NewPool(cyclone.DefaultPool(20)) // or pass radix client
 defer redis.Close()
 ```
 
-## Hash api
+## Hash
 
 ```go
 redis.Hash("stats").Incr("reqs", 1)
