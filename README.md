@@ -4,7 +4,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/qbart/cyclone)](https://github.com/qbart/cyclone/commits/master)
 # cyclone - WIP - not intened for production use
 
-Wrapper around [radix](https://github.com/mediocregopher/radix) with some additional TODO-features.
+Wrapper around [radix](https://github.com/mediocregopher/radix) with some additional TODO-features. [GoDoc here](https://pkg.go.dev/github.com/qbart/cyclone/cyclone)
 
 ## Connection
 
