@@ -21,7 +21,7 @@ defer redis.Close()
 redis.Hash("stats").Incr("reqs", 1)
 redis.Hash("stats").Set("uptime", "0s")
 // ...
-ch := redis.Hash("big").Scan().Match("*").Count(10).ChannelKV(50)
+ch := redis.Hash("big").Scan().Match("*").Count(10).ChanKV(50)
 for kv := range ch {
   log.Println(kv.Key, "=>", kv.Val)
 }
