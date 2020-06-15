@@ -3,8 +3,8 @@
 [![CI](https://github.com/qbart/cyclone/workflows/CI/badge.svg?branch=master)](https://github.com/qbart/cyclone/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/qbart/cyclone)](https://goreportcard.com/report/github.com/qbart/cyclone)
 [![Last commit](https://img.shields.io/github/last-commit/qbart/cyclone)](https://github.com/qbart/cyclone/commits/master)
-  
-# cyclone - WIP - not intened for production use
+
+# cyclone - WIP
 
 Wrapper around [radix](https://github.com/mediocregopher/radix) with some additional TODO-features.
 

@@ -15,4 +15,6 @@ func withConn(with func(*Cyclone)) {
 	c := NewPool(raw)
 	defer c.Close()
 	with(c)
+
+	raw.Do(radix.Cmd(nil, "FLUSHALL"))
 }

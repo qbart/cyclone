@@ -16,7 +16,7 @@ type Hash struct {
 type HashScanIterator struct {
 	hash    *Hash
 	cursor  string
-	count   int64
+	count   int
 	pattern string
 }
 
@@ -78,13 +78,13 @@ func (l *Hash) GetAll() (all map[string]string) {
 // https://redis.io/commands/hincrby
 //
 // Time complexity: O(1)
-func (l *Hash) Incr(field string, by int64) (valAfterIncr int64) {
+func (l *Hash) Incr(field string, by int) (valAfterIncr int) {
 	l.cyclone.Raw.Do(radix.Cmd(
 		&valAfterIncr,
 		"HINCRBY",
 		l.key,
 		field,
-		strconv.FormatInt(by, 10),
+		strconv.FormatInt(int64(by), 10),
 	))
 	return
 }
@@ -142,24 +142,6 @@ func (l *Hash) MGet(fields ...interface{}) (values []string) {
 	return
 }
 
-// MSet sets field in the hash stored at key to value. If key does not exist,
-// a new key holding a hash is created. If field already exists in the hash,
-// it is overwritten.
-// https://redis.io/commands/hset
-//
-// Time complexity: O(1) for each field/value pair added, so O(N) to add N
-//                  field/value pairs when the command is called with multiple
-//                  field/value pairs.
-func (l *Hash) MSet(kvpairs ...interface{}) (addedFields int) {
-	l.cyclone.Raw.Do(radix.FlatCmd(
-		&addedFields,
-		"HSET", // HMSET deprecated since Redis 4.0.0
-		l.key,
-		kvpairs...,
-	))
-	return
-}
-
 // Scan iterates fields of Hash types and their associated values.
 // https://redis.io/commands/hscan
 // https://redis.io/commands/scan
@@ -176,9 +158,16 @@ func (l *Hash) Scan() *HashScanIterator {
 // it is overwritten.
 // https://redis.io/commands/hset
 //
-// Time complexity: O(1)
-func (l *Hash) Set(k, v string) (addedFields int) {
-	l.cyclone.Raw.Do(radix.Cmd(&addedFields, "HSET", l.key, k, v))
+// Time complexity: O(1) for each field/value pair added, so O(N) to add N
+//                  field/value pairs when the command is called with multiple
+//                  field/value pairs.
+func (l *Hash) Set(kvpairs ...interface{}) (addedFields int) {
+	l.cyclone.Raw.Do(radix.FlatCmd(
+		&addedFields,
+		"HSET",
+		l.key,
+		kvpairs...,
+	))
 	return
 }
 
@@ -199,7 +188,7 @@ func (l *Hash) SetNX(k, v string) bool {
 // https://redis.io/commands/hstrlen
 //
 // Time complexity: O(1)
-func (l *Hash) StrLen(field string) (length int64) {
+func (l *Hash) StrLen(field string) (length int) {
 	l.cyclone.Raw.Do(radix.Cmd(&length, "HSTRLEN", l.key, field))
 	return
 }
@@ -216,7 +205,7 @@ func (l *Hash) Vals() (values []string) {
 // Count sets count hint for iterator. Redis default hint is 10 when not specified.
 // https://redis.io/commands/scan#the-count-option
 //
-func (i *HashScanIterator) Count(count int64) *HashScanIterator {
+func (i *HashScanIterator) Count(count int) *HashScanIterator {
 	i.count = count
 	return i
 }
@@ -235,7 +224,17 @@ func (i *HashScanIterator) Chan(bufferSize int) <-chan string {
 	ch := make(chan string, bufferSize)
 
 	go func() {
-		scanner := radix.NewScanner(i.hash.cyclone.Raw, radix.ScanOpts{Command: "HSCAN", Key: i.hash.key})
+		opts := radix.ScanOpts{
+			Command: "HSCAN",
+			Key:     i.hash.key,
+		}
+		if i.pattern != "" {
+			opts.Pattern = i.pattern
+		}
+		if i.count != 0 {
+			opts.Count = i.count
+		}
+		scanner := radix.NewScanner(i.hash.cyclone.Raw, opts)
 		var key string
 		for scanner.Next(&key) {
 			ch <- key
@@ -258,7 +257,17 @@ func (i *HashScanIterator) ChanKV(bufferSize int) <-chan HashField {
 			field   HashField
 			hasNext bool
 		)
-		scanner := radix.NewScanner(i.hash.cyclone.Raw, radix.ScanOpts{Command: "HSCAN", Key: i.hash.key})
+		opts := radix.ScanOpts{
+			Command: "HSCAN",
+			Key:     i.hash.key,
+		}
+		if i.pattern != "" {
+			opts.Pattern = i.pattern
+		}
+		if i.count != 0 {
+			opts.Count = i.count
+		}
+		scanner := radix.NewScanner(i.hash.cyclone.Raw, opts)
 
 		toggle := true
 		for {
