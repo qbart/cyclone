@@ -230,7 +230,7 @@ func (i *HashScanIterator) Match(pattern string) *HashScanIterator {
 }
 
 // Chan returns channel and starts iteration.
-// It will send Key/Values separetely.
+// It will send Key/Values separately.
 func (i *HashScanIterator) Chan(bufferSize int) <-chan string {
 	ch := make(chan string, bufferSize)
 
