@@ -7,6 +7,7 @@
 # cyclone - WIP
 
 Wrapper around [radix](https://github.com/mediocregopher/radix) with some additional TODO-features.
+It contains comments from [redis.io/commands](https://redis.io/commands) for a convenience but you should always refer to offical Redis docs.
 
 ## Connection
 
@@ -25,4 +26,12 @@ ch := redis.Hash("big").Scan().Match("*").Count(10).ChanKV(50)
 for kv := range ch {
   log.Println(kv.Key, "=>", kv.Val)
 }
+```
+
+## List
+
+```go
+redis.List("list").Push("a", "b", "c")
+redis.List("list").RPop()
+// ...
 ```
