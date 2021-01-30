@@ -1,6 +1,7 @@
 package cyclone
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -36,6 +37,11 @@ func (c *Cyclone) List(key string) *List {
 // Hash returns Hash wrapper.
 func (c *Cyclone) Hash(key string) *Hash {
 	return &Hash{cyclone: c, key: key}
+}
+
+// Hashf returns Hash wrapper. Key is built from fmt.Sprintf(format, any...).
+func (c *Cyclone) Hashf(format string, any ...interface{}) *Hash {
+	return &Hash{cyclone: c, key: fmt.Sprintf(key, any...)}
 }
 
 // Close closes current connection.
