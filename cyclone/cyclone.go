@@ -34,6 +34,12 @@ func (c *Cyclone) List(key string) *List {
 	return &list
 }
 
+// Listf returns list wrapper. Key is built from fmt.Sprintf(format, any...).
+func (c *Cyclone) Listf(format string, any ...interface{}) *List {
+	list := List{cyclone: c, key: fmt.Sprintf(format, any...)}
+	return &list
+}
+
 // Hash returns Hash wrapper.
 func (c *Cyclone) Hash(key string) *Hash {
 	return &Hash{cyclone: c, key: key}
@@ -41,7 +47,7 @@ func (c *Cyclone) Hash(key string) *Hash {
 
 // Hashf returns Hash wrapper. Key is built from fmt.Sprintf(format, any...).
 func (c *Cyclone) Hashf(format string, any ...interface{}) *Hash {
-	return &Hash{cyclone: c, key: fmt.Sprintf(key, any...)}
+	return &Hash{cyclone: c, key: fmt.Sprintf(format, any...)}
 }
 
 // Close closes current connection.

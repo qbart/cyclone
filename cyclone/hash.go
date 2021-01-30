@@ -32,8 +32,8 @@ type HashField struct {
 // https://redis.io/commands/hdel
 //
 // Time complexity: O(N) where N is the number of fields to be removed.
-func (l *Hash) Del(fields ...interface{}) (deletedKeys int) {
-	l.cyclone.Raw.Do(radix.FlatCmd(
+func (l *Hash) Del(fields ...interface{}) (deletedKeys int, err error) {
+	err = l.cyclone.Raw.Do(radix.FlatCmd(
 		&deletedKeys,
 		"HDEL",
 		l.key,
@@ -46,18 +46,18 @@ func (l *Hash) Del(fields ...interface{}) (deletedKeys int) {
 // https://redis.io/commands/hexists
 //
 // Time complexity: O(1)
-func (l *Hash) Exists(field string) bool {
+func (l *Hash) Exists(field string) (bool, error) {
 	var exists int
-	l.cyclone.Raw.Do(radix.Cmd(&exists, "HEXISTS", l.key, field))
-	return exists == 1
+	err := l.cyclone.Raw.Do(radix.Cmd(&exists, "HEXISTS", l.key, field))
+	return exists == 1, err
 }
 
 // Get returns the value associated with field in the hash stored at key.
 // https://redis.io/commands/hget
 //
 // Time complexity: O(1)
-func (l *Hash) Get(field string) (value string) {
-	l.cyclone.Raw.Do(radix.Cmd(&value, "HGET", l.key, field))
+func (l *Hash) Get(field string) (value string, err error) {
+	err = l.cyclone.Raw.Do(radix.Cmd(&value, "HGET", l.key, field))
 	return
 }
 
@@ -67,8 +67,8 @@ func (l *Hash) Get(field string) (value string) {
 // https://redis.io/commands/hgetall
 //
 // Time complexity: O(N) where N is the size of the hash.
-func (l *Hash) GetAll() (all map[string]string) {
-	l.cyclone.Raw.Do(radix.Cmd(&all, "HGETALL", l.key))
+func (l *Hash) GetAll() (all map[string]string, err error) {
+	err = l.cyclone.Raw.Do(radix.Cmd(&all, "HGETALL", l.key))
 	return
 }
 
@@ -78,8 +78,8 @@ func (l *Hash) GetAll() (all map[string]string) {
 // https://redis.io/commands/hincrby
 //
 // Time complexity: O(1)
-func (l *Hash) Incr(field string, by int) (valAfterIncr int) {
-	l.cyclone.Raw.Do(radix.Cmd(
+func (l *Hash) Incr(field string, by int) (valAfterIncr int, err error) {
+	err = l.cyclone.Raw.Do(radix.Cmd(
 		&valAfterIncr,
 		"HINCRBY",
 		l.key,
@@ -96,8 +96,8 @@ func (l *Hash) Incr(field string, by int) (valAfterIncr int) {
 // https://redis.io/commands/hincrbyfloat
 //
 // Time complexity: O(1)
-func (l *Hash) IncrFloat(field string, by float64) (valAfterIncr float64) {
-	l.cyclone.Raw.Do(radix.Cmd(
+func (l *Hash) IncrFloat(field string, by float64) (valAfterIncr float64, err error) {
+	err = l.cyclone.Raw.Do(radix.Cmd(
 		&valAfterIncr,
 		"HINCRBYFLOAT",
 		l.key,
@@ -111,8 +111,8 @@ func (l *Hash) IncrFloat(field string, by float64) (valAfterIncr float64) {
 // https://redis.io/commands/hkeys
 //
 // Time complexity: O(N) where N is the size of the hash.
-func (l *Hash) Keys() (keys []string) {
-	l.cyclone.Raw.Do(radix.Cmd(&keys, "HKEYS", l.key))
+func (l *Hash) Keys() (keys []string, err error) {
+	err = l.cyclone.Raw.Do(radix.Cmd(&keys, "HKEYS", l.key))
 	return
 }
 
@@ -120,8 +120,8 @@ func (l *Hash) Keys() (keys []string) {
 // https://redis.io/commands/hlen
 //
 // Time complexity: O(1)
-func (l *Hash) Len() (keyCount int) {
-	l.cyclone.Raw.Do(radix.Cmd(&keyCount, "HLEN", l.key))
+func (l *Hash) Len() (keyCount int, err error) {
+	err = l.cyclone.Raw.Do(radix.Cmd(&keyCount, "HLEN", l.key))
 	return
 }
 
@@ -132,8 +132,8 @@ func (l *Hash) Len() (keyCount int) {
 // https://redis.io/commands/hmget
 //
 // Time complexity: O(N) where N is the number of fields being requested.
-func (l *Hash) MGet(fields ...interface{}) (values []string) {
-	l.cyclone.Raw.Do(radix.FlatCmd(
+func (l *Hash) MGet(fields ...interface{}) (values []string, err error) {
+	err = l.cyclone.Raw.Do(radix.FlatCmd(
 		&values,
 		"HMGET",
 		l.key,
@@ -161,8 +161,8 @@ func (l *Hash) Scan() *HashScanIterator {
 // Time complexity: O(1) for each field/value pair added, so O(N) to add N
 //                  field/value pairs when the command is called with multiple
 //                  field/value pairs.
-func (l *Hash) Set(kvpairs ...interface{}) (addedFields int) {
-	l.cyclone.Raw.Do(radix.FlatCmd(
+func (l *Hash) Set(kvpairs ...interface{}) (addedFields int, err error) {
+	err = l.cyclone.Raw.Do(radix.FlatCmd(
 		&addedFields,
 		"HSET",
 		l.key,
@@ -177,10 +177,10 @@ func (l *Hash) Set(kvpairs ...interface{}) (addedFields int) {
 // https://redis.io/commands/hsetnx
 //
 // Time complexity: O(1)
-func (l *Hash) SetNX(k, v string) bool {
+func (l *Hash) SetNX(k, v string) (bool, error) {
 	var wasSet int
-	l.cyclone.Raw.Do(radix.Cmd(&wasSet, "HSETNX", l.key, k, v))
-	return wasSet == 1
+	err := l.cyclone.Raw.Do(radix.Cmd(&wasSet, "HSETNX", l.key, k, v))
+	return wasSet == 1, err
 }
 
 // StrLen returns the string length of the value associated with field in the hash stored at key.
@@ -188,8 +188,8 @@ func (l *Hash) SetNX(k, v string) bool {
 // https://redis.io/commands/hstrlen
 //
 // Time complexity: O(1)
-func (l *Hash) StrLen(field string) (length int) {
-	l.cyclone.Raw.Do(radix.Cmd(&length, "HSTRLEN", l.key, field))
+func (l *Hash) StrLen(field string) (length int, err error) {
+	err = l.cyclone.Raw.Do(radix.Cmd(&length, "HSTRLEN", l.key, field))
 	return
 }
 
@@ -197,8 +197,8 @@ func (l *Hash) StrLen(field string) (length int) {
 // https://redis.io/commands/hvals
 //
 // Time complexity: O(N) where N is the size of the hash.
-func (l *Hash) Vals() (values []string) {
-	l.cyclone.Raw.Do(radix.Cmd(&values, "HVALS", l.key))
+func (l *Hash) Vals() (values []string, err error) {
+	err = l.cyclone.Raw.Do(radix.Cmd(&values, "HVALS", l.key))
 	return
 }
 
@@ -241,7 +241,7 @@ func (i *HashScanIterator) Chan(bufferSize int) <-chan string {
 		}
 		close(ch)
 		if err := scanner.Close(); err != nil {
-			panic(err)
+			panic(err) // TODO: remove panic from lib
 		}
 	}()
 	return ch
@@ -284,7 +284,7 @@ func (i *HashScanIterator) ChanKV(bufferSize int) <-chan HashField {
 		}
 		close(ch)
 		if err := scanner.Close(); err != nil {
-			panic(err)
+			panic(err) // TODO: remove panic from lib
 		}
 	}()
 	return ch

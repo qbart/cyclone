@@ -5,12 +5,13 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/franela/goblin"
+	"github.com/franela/goblin"
 	"github.com/mediocregopher/radix/v3"
 )
 
 func TestHash(t *testing.T) {
-	g := Goblin(t)
+	g := goblin.Goblin(t)
+
 	withConn(func(c *Cyclone) {
 		g.Describe(".Del", func() {
 			g.It("Deletes keys and returns deleted count", func() {
@@ -22,7 +23,7 @@ func TestHash(t *testing.T) {
 				g.Assert(before["b"]).Eql("2")
 				g.Assert(before["c"]).Eql("3")
 
-				deletedKeys := c.Hash("HashDel").Del("a", "b")
+				deletedKeys, _ := c.Hash("HashDel").Del("a", "b")
 
 				g.Assert(deletedKeys).Equal(2)
 				c.Raw.Do(radix.Cmd(&after, "HGETALL", "HashDel"))
@@ -36,8 +37,8 @@ func TestHash(t *testing.T) {
 			g.It("Returns T for existing keys, F otherwise", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashExists", "a", "1"))
 
-				aExists := c.Hash("HashExists").Exists("a")
-				bExists := c.Hash("HashExists").Exists("b")
+				aExists, _ := c.Hash("HashExists").Exists("a")
+				bExists, _ := c.Hash("HashExists").Exists("b")
 
 				g.Assert(aExists).Equal(true)
 				g.Assert(bExists).Equal(false)
@@ -48,7 +49,7 @@ func TestHash(t *testing.T) {
 			g.It("Returns value for a key", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashGet", "a", "1"))
 
-				val := c.Hash("HashGet").Get("a")
+				val, _ := c.Hash("HashGet").Get("a")
 
 				g.Assert(val).Equal("1")
 			})
@@ -58,7 +59,7 @@ func TestHash(t *testing.T) {
 			g.It("Returns all value for a key", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashGetAll", "a", "1", "b", "2"))
 
-				val := c.Hash("HashGetAll").GetAll()
+				val, _ := c.Hash("HashGetAll").GetAll()
 
 				g.Assert(val).Equal(map[string]string{
 					"a": "1",
@@ -71,8 +72,8 @@ func TestHash(t *testing.T) {
 			g.It("Increments a floating field and returns incrmented value", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashIncr", "a", "1", "b", "2"))
 
-				val1 := c.Hash("HashIncr").Incr("a", 5)
-				val2 := c.Hash("HashIncr").Get("a")
+				val1, _ := c.Hash("HashIncr").Incr("a", 5)
+				val2, _ := c.Hash("HashIncr").Get("a")
 
 				g.Assert(val1).Eql(6)
 				g.Assert(val2).Equal("6")
@@ -83,8 +84,8 @@ func TestHash(t *testing.T) {
 			g.It("Increments an integer field and returns incrmented value", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashIncrFloat", "a", "3.14"))
 
-				val1 := c.Hash("HashIncrFloat").IncrFloat("a", -0.43)
-				val2 := c.Hash("HashIncrFloat").Get("a")
+				val1, _ := c.Hash("HashIncrFloat").IncrFloat("a", -0.43)
+				val2, _ := c.Hash("HashIncrFloat").Get("a")
 
 				g.Assert(val1).Eql(2.71)
 				g.Assert(val2).Equal("2.71")
@@ -95,7 +96,7 @@ func TestHash(t *testing.T) {
 			g.It("Returns hash keys", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashKeys", "a", "1", "b", "2"))
 
-				val := c.Hash("HashKeys").Keys()
+				val, _ := c.Hash("HashKeys").Keys()
 
 				g.Assert(val).Eql([]string{"a", "b"})
 			})
@@ -105,7 +106,7 @@ func TestHash(t *testing.T) {
 			g.It("Returns num of keys", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashLen", "a", "1", "b", "2"))
 
-				val := c.Hash("HashLen").Len()
+				val, _ := c.Hash("HashLen").Len()
 
 				g.Assert(val).Eql(2)
 			})
@@ -115,7 +116,7 @@ func TestHash(t *testing.T) {
 			g.It("Returns selected key values", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashMGet", "a", "1", "b", "2", "c", "3"))
 
-				val := c.Hash("HashMGet").MGet("a", "c")
+				val, _ := c.Hash("HashMGet").MGet("a", "c")
 
 				g.Assert(val).Eql([]string{"1", "3"})
 			})
@@ -183,12 +184,12 @@ func TestHash(t *testing.T) {
 
 		g.Describe(".Set", func() {
 			g.It("Sets fields by K/V pairs", func() {
-				addedFields := c.Hash("HashSet").Set(
+				addedFields, _ := c.Hash("HashSet").Set(
 					"a", "1",
 					"b", "2",
 					"c", "3",
 				)
-				val := c.Hash("HashSet").MGet("a", "c")
+				val, _ := c.Hash("HashSet").MGet("a", "c")
 
 				g.Assert(addedFields).Eql(3)
 				g.Assert(val).Eql([]string{"1", "3"})
@@ -197,9 +198,9 @@ func TestHash(t *testing.T) {
 
 		g.Describe(".SetNX", func() {
 			g.It("Sets field by K/V only if not exists", func() {
-				first := c.Hash("HashSetNX").SetNX("a", "1")
-				second := c.Hash("HashSetNX").SetNX("a", "2")
-				val := c.Hash("HashSetNX").Get("a")
+				first, _ := c.Hash("HashSetNX").SetNX("a", "1")
+				second, _ := c.Hash("HashSetNX").SetNX("a", "2")
+				val, _ := c.Hash("HashSetNX").Get("a")
 
 				g.Assert(first).Eql(true)
 				g.Assert(second).Eql(false)
@@ -211,8 +212,8 @@ func TestHash(t *testing.T) {
 			g.It("Returns field value length", func() {
 				c.Raw.Do(radix.Cmd(nil, "HSET", "HashStrLen", "a", "12", "b", "ᴓ"))
 
-				lenOfa := c.Hash("HashStrLen").StrLen("a")
-				lenOfb := c.Hash("HashStrLen").StrLen("b")
+				lenOfa, _ := c.Hash("HashStrLen").StrLen("a")
+				lenOfb, _ := c.Hash("HashStrLen").StrLen("b")
 
 				g.Assert(lenOfa).Eql(2)
 				g.Assert(lenOfb).Eql(3) // byte-length of ᴓ (e1b493)
@@ -226,7 +227,7 @@ func TestHash(t *testing.T) {
 					"b", "2",
 					"c", "3",
 				)
-				val := c.Hash("HashVals").Vals()
+				val, _ := c.Hash("HashVals").Vals()
 
 				g.Assert(val).Eql([]string{"1", "2", "3"})
 			})
