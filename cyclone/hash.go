@@ -14,10 +14,8 @@ type Hash struct {
 
 // HashScanIterator allows for channel based iteration.
 type HashScanIterator struct {
-	hash    *Hash
-	cursor  string
-	count   int
-	pattern string
+	hash *Hash
+	opts radix.ScanOpts
 }
 
 // HashField is used in ChanKV iterator as a channel type.
@@ -206,7 +204,7 @@ func (l *Hash) Vals() (values []string, err error) {
 // https://redis.io/commands/scan#the-count-option
 //
 func (i *HashScanIterator) Count(count int) *HashScanIterator {
-	i.count = count
+	i.opts.Count = count
 	return i
 }
 
@@ -214,7 +212,7 @@ func (i *HashScanIterator) Count(count int) *HashScanIterator {
 // https://redis.io/commands/scan#the-match-option
 //
 func (i *HashScanIterator) Match(pattern string) *HashScanIterator {
-	i.pattern = pattern
+	i.opts.Pattern = pattern
 	return i
 }
 
@@ -224,24 +222,21 @@ func (i *HashScanIterator) Chan(bufferSize int) <-chan string {
 	ch := make(chan string, bufferSize)
 
 	go func() {
-		opts := radix.ScanOpts{
-			Command: "HSCAN",
-			Key:     i.hash.key,
-		}
-		if i.pattern != "" {
-			opts.Pattern = i.pattern
-		}
-		if i.count != 0 {
-			opts.Count = i.count
-		}
-		scanner := radix.NewScanner(i.hash.cyclone.Raw, opts)
+		defer close(ch)
+
+		i.opts.Command = "HSCAN"
+		i.opts.Key = i.hash.key
+
+		scanner := radix.NewScanner(i.hash.cyclone.Raw, i.opts)
+		defer func() {
+			if err := scanner.Close(); err != nil {
+				// TODO: handle error
+			}
+		}()
+
 		var key string
 		for scanner.Next(&key) {
 			ch <- key
-		}
-		close(ch)
-		if err := scanner.Close(); err != nil {
-			panic(err) // TODO: remove panic from lib
 		}
 	}()
 	return ch
@@ -253,23 +248,22 @@ func (i *HashScanIterator) ChanKV(bufferSize int) <-chan HashField {
 	ch := make(chan HashField, bufferSize)
 
 	go func() {
-		var (
-			field   HashField
-			hasNext bool
-		)
-		opts := radix.ScanOpts{
-			Command: "HSCAN",
-			Key:     i.hash.key,
-		}
-		if i.pattern != "" {
-			opts.Pattern = i.pattern
-		}
-		if i.count != 0 {
-			opts.Count = i.count
-		}
-		scanner := radix.NewScanner(i.hash.cyclone.Raw, opts)
+		defer close(ch)
 
+		i.opts.Command = "HSCAN"
+		i.opts.Key = i.hash.key
+
+		scanner := radix.NewScanner(i.hash.cyclone.Raw, i.opts)
+		defer func() {
+			if err := scanner.Close(); err != nil {
+				// TODO: handle error
+			}
+		}()
+
+		var field HashField
 		toggle := true
+		hasNext := false
+
 		for {
 			if toggle {
 				hasNext = scanner.Next(&field.Key)
@@ -281,10 +275,6 @@ func (i *HashScanIterator) ChanKV(bufferSize int) <-chan HashField {
 				break
 			}
 			toggle = !toggle
-		}
-		close(ch)
-		if err := scanner.Close(); err != nil {
-			panic(err) // TODO: remove panic from lib
 		}
 	}()
 	return ch
