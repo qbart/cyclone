@@ -191,7 +191,7 @@ func TestList(t *testing.T) {
 					list.Range(0, -1),
 				).Eql([]string{"a", "b"})
 
-				// with exising index
+				// with existing index
 				g.Assert(
 					list.Set(1, "c"),
 				).Eql(true)
